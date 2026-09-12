@@ -1,7 +1,7 @@
 # Roadmap: Trust Dependency Analyzer - Trustpkg
 
 ## MVP
-- [ ] **CLI:** Command-line handling and management
+- [x] **CLI:** Command-line handling and management
 - [ ] **Analyzer:** Determines analysis logic
 - [ ] **Sources:** Knows where to fetch data
 - [ ] **Score:** Scoring system
