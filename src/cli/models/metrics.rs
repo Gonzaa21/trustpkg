@@ -2,14 +2,14 @@ use chrono::{DateTime, Utc};
 
 #[derive(Debug)]
 pub struct MaintenanceMetrics {
-    pub last_release: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
     pub repository_archived: bool,
     pub status: Status,
 }
 #[derive(Debug)]
 pub struct PopularityMetrics {
-    pub downloads: i32,
-    pub dependent_packages: i32,
+    pub downloads: u64,
+    pub recent_downloads: u64,
 }
 #[derive(Debug)]
 pub struct SecurityMetrics {
