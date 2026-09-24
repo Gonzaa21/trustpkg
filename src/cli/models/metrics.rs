@@ -2,8 +2,8 @@ use chrono::{DateTime, Utc};
 
 #[derive(Debug)]
 pub struct MaintenanceMetrics {
-    pub updated_at: DateTime<Utc>,
-    pub repository_archived: bool,
+    pub updated_at: Option<DateTime<Utc>>,
+    pub repository_archived: Option<bool>,
     pub status: Status,
 }
 #[derive(Debug)]
@@ -20,5 +20,6 @@ pub struct SecurityMetrics {
 #[derive(Debug)]
 pub enum Status {
     Active,
-    Inactive
+    Inactive,
+    Unknown
 }
