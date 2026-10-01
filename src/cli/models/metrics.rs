@@ -23,3 +23,25 @@ pub enum Status {
     Inactive,
     Unknown
 }
+#[derive(Ord, PartialOrd, PartialEq, Eq)]
+pub enum VulnSeverity {
+    Unknown,
+    Low,
+    Moderate,
+    High,
+    Critical,
+}
+
+impl From<&str> for VulnSeverity {
+    fn from(value: &str) -> Self {
+        match value.to_uppercase().as_str() {
+            "CRITICAL" =>  Self::Critical,
+            "HIGH" => Self::High,
+            "MODERATE" => Self::Moderate,
+            "LOW" => Self::Low,
+            _ => Self::Unknown
+        }
+    }
+}
+
+// let severity: VulnSeverity = affected.ecosystem_specific.and_then(|es| es.severity).map(|s| VulnSeverity::from(&s)).unwrap_or(VulnSeverity::Unknown);

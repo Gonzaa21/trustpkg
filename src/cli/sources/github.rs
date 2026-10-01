@@ -1,7 +1,6 @@
 use serde::Deserialize;
 use chrono::{DateTime, Utc};
 
-
 pub struct GithubRepoInfo {
     pub archived: bool,
     pub pushed_at: DateTime<Utc>,
@@ -44,11 +43,9 @@ impl Github {
 }
 
 pub fn parse_github_url(url: &str) -> Option<(String, String)> {
-    // extraer owner y repo de algo como "https://github.com/owner/repo"
 
     let parsed = url::Url::parse(url).ok()?;
     
-    // devolver None si el host no es github.com o el formato no matchea
     if parsed.host_str() != Some("github.com") { return None; }
     
     let mut segments = parsed.path_segments()?;

@@ -1,4 +1,4 @@
-use chrono::{Utc, Datelike};
+use chrono::Utc;
 
 use crate::cli::models::metrics::{MaintenanceMetrics, Status};
 use crate::cli::models::package::Package;
