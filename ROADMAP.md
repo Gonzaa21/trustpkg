@@ -4,7 +4,7 @@
 - [x] **CLI:** Command-line handling and management
 - [x] **Analyzer:** Determines analysis logic
 - [x] **Sources:** Knows where to fetch data
-- [ ] **Score:** Scoring system
+- [x] **Score:** Scoring system
 - [ ] **Report:** Final results
 
 - [x] **Software architecture**
