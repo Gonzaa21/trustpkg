@@ -17,7 +17,7 @@ pub struct SecurityMetrics {
     pub critical_advisories: u32,
     pub high_advisories: u32,
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Status {
     Active,
     Inactive,

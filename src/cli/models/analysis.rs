@@ -15,7 +15,7 @@ pub struct Metadata {
 pub struct AnalysisResult {
     pub package: Package,
     pub metadata: Metadata,
-    pub security: SecurityMetrics,
+    pub security: Option<SecurityMetrics>,
     pub maintenance: MaintenanceMetrics,
     pub popularity: PopularityMetrics,
     pub score: TrustScore,
