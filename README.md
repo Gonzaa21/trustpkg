@@ -15,11 +15,34 @@ Trustpkg analyzes third-party dependencies by combining security, maintenance, r
 
 ## Usage Example
 ```bash
-# to be added later
+cargo run -- analyze <crate> --version <version> -- format <format> (json or text)
 ```
+```bash
+cargo run -- analyze emit_ansi_term
 
-## Demo
-*(A GIF will be included soon).*
+== 1. PACKAGE DETAILS ==
+Name:        emit_ansi_term v0.2.0
+Description: An ANSI (colored) terminal collector for emit.
+Repository:  N/A
+License:     Apache-2.0
+Created:     2016-06-23 09:31:43.452328 UTC
+Updated:     2016-07-05 01:01:25.610080 UTC
+Is yanked:   false
+Downloads:   4789 (recent: 8)
+Sources:     crates.io, osv.dev
+
+== 2. SCORE ==
+Maintenance  [######----] Unknown
+Popularity   [####------] 46
+Security     [##########] 100 | 0 advisory (0 critical, 0 high)
+----------------------------------------
+TRUST SCORE  [#######---] 77 / 100
+
+VERDICT      REVIEW
+
+== 3. FINAL REPORT ==
+[INFO] Maintenance could not be verified (no GitHub repository or unreachable)
+```
 
 ## Installation
 

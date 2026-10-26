@@ -1,8 +1,9 @@
 use crate::cli::models::analysis::AnalysisResult;
 use crate::cli::models::report::{EvidenceKind, Recommendation, Severity};
 use crate::cli::sources::{crates_io::CratesIo, source::Source};
-use crate::cli::score::{popularity::calculate_popularity, maintenance::calculate_maintenance, security::calculate_security, calculator::{calculate_score, score_security}};
+use crate::cli::score::{popularity::calculate_popularity, maintenance::calculate_maintenance, security::calculate_security, calculator::calculate_score};
 use crate::cli::models::analysis::Metadata;
+use crate::cli::analysis::issues::detect_issues;
 use chrono::Utc;
 
 pub async fn run_analysis(
@@ -10,14 +11,15 @@ pub async fn run_analysis(
     version: Option<String>,
 ) -> Result<AnalysisResult, Box<dyn std::error::Error>> {
     let source = CratesIo::new();
-    let package = source.fetch(&name, version.as_deref()).await?;
+    let mut sources = String::from(source.name());
     
+    let package = source.fetch(&name, version.as_deref()).await?;
+
     let pop = calculate_popularity(&package);
     let maint = calculate_maintenance(&package).await;
-    
+
     let mut recommendations = Vec::new();
-    let mut sources = String::from("crates.io");
-    
+
     let sec = match calculate_security(&package).await {
         Ok(m) => {
             sources.push_str(", osv.dev");
@@ -32,7 +34,10 @@ pub async fn run_analysis(
             None
         }
     };
-    let score = calculate_score(sec.as_ref().map(score_security), &maint, &pop);
+
+    recommendations.extend(detect_issues(&package, &maint, sec.as_ref()));
+    
+    let score = calculate_score(&package, sec.as_ref(), &maint, &pop);
 
     let metadata = Metadata {
         analyzed_at: Utc::now(),

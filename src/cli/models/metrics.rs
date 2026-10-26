@@ -16,6 +16,7 @@ pub struct SecurityMetrics {
     pub known_advisories: u32,
     pub critical_advisories: u32,
     pub high_advisories: u32,
+    pub advisory_ids: Vec<String>,
 }
 #[derive(Debug, PartialEq, Serialize)]
 pub enum Status {
@@ -43,5 +44,3 @@ impl From<&str> for VulnSeverity {
         }
     }
 }
-
-// let severity: VulnSeverity = affected.ecosystem_specific.and_then(|es| es.severity).map(|s| VulnSeverity::from(&s)).unwrap_or(VulnSeverity::Unknown);

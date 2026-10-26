@@ -9,8 +9,6 @@ pub async fn calculate_security(package: &Package) -> Result<SecurityMetrics, Bo
         .await?;
 
     fn highest_severity(vuln: &VulnsData) -> VulnSeverity {
-    let id = &vuln.id; 
-
     vuln.affected
         .iter()
         .map(|aff| {
@@ -32,9 +30,14 @@ pub async fn calculate_security(package: &Package) -> Result<SecurityMetrics, Bo
         .filter(|v| highest_severity(v) == VulnSeverity::High)
         .count();
 
+    let advisory_ids: Vec<String> = resp.vulns.iter()
+        .map(|v| v.id.clone())
+        .collect();
+
     Ok(SecurityMetrics {
         known_advisories: u32::try_from(resp.vulns.len())?,
         critical_advisories: u32::try_from(critical_advisories)?,
         high_advisories: u32::try_from(high_advisories)?,
+        advisory_ids,
     })
 }
