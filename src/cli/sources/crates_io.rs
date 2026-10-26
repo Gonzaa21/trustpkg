@@ -13,7 +13,6 @@ pub struct CratesIoResponse {
 
 #[derive(Deserialize)]
 pub struct PackageResponseData {
-    pub id: String,
     pub name: String,
     pub description: Option<String>,
     pub downloads: u64,
@@ -27,7 +26,6 @@ pub struct PackageResponseData {
 #[derive(Deserialize)]
 pub struct VersionData {
     pub num: String,
-    pub updated_at: DateTime<Utc>,
     pub license: Option<String>,
     pub yanked: bool,
 }
@@ -78,6 +76,7 @@ impl Source for CratesIo {
             updated_at: data.crate_data.updated_at,
             keywords: data.crate_data.keywords,
             license: version_data.license.clone(),
+            yanked: version_data.yanked,
         })
         
     }

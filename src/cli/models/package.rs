@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
-
-#[derive(Debug)]
+use serde::Serialize;
+#[derive(Debug, Serialize)]
 pub struct Package { 
     pub name: String, 
     pub version: String, 
@@ -12,4 +12,5 @@ pub struct Package {
     pub updated_at: DateTime<Utc>,
     pub keywords: Vec<String>,
     pub license: Option<String>,
+    pub yanked: bool,
 }

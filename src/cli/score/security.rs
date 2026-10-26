@@ -9,17 +9,19 @@ pub async fn calculate_security(package: &Package) -> Result<SecurityMetrics, Bo
         .await?;
 
     fn highest_severity(vuln: &VulnsData) -> VulnSeverity {
-        vuln.affected
-            .iter()
-            .map(|aff| {
-                aff.ecosystem_specific
-                    .as_ref()
-                    .and_then(|es| es.severity.as_deref())
-                    .map(VulnSeverity::from)
-                    .unwrap_or(VulnSeverity::Unknown)
-            })
-            .max()
-            .unwrap_or(VulnSeverity::Unknown)
+    let id = &vuln.id; 
+
+    vuln.affected
+        .iter()
+        .map(|aff| {
+            aff.ecosystem_specific
+                .as_ref()
+                .and_then(|es| es.severity.as_deref())
+                .map(VulnSeverity::from)
+                .unwrap_or(VulnSeverity::Unknown)
+        })
+        .max()
+        .unwrap_or(VulnSeverity::Unknown)
     }
 
     let critical_advisories = resp.vulns.iter()

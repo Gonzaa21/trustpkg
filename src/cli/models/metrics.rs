@@ -1,23 +1,23 @@
 use chrono::{DateTime, Utc};
-
-#[derive(Debug)]
+use serde::Serialize;
+#[derive(Debug, Serialize)]
 pub struct MaintenanceMetrics {
     pub updated_at: Option<DateTime<Utc>>,
     pub repository_archived: Option<bool>,
     pub status: Status,
 }
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct PopularityMetrics {
     pub downloads: u64,
     pub recent_downloads: u64,
 }
-#[derive(Debug)]
+#[derive(Debug, Serialize, Clone)]
 pub struct SecurityMetrics {
     pub known_advisories: u32,
     pub critical_advisories: u32,
     pub high_advisories: u32,
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize)]
 pub enum Status {
     Active,
     Inactive,

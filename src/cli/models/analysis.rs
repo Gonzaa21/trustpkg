@@ -3,15 +3,16 @@ use crate::cli::models::metrics::{SecurityMetrics, MaintenanceMetrics, Popularit
 use crate::cli::models::score::TrustScore;
 use crate::cli::models::report::Recommendation;
 use chrono::{DateTime, Utc};
+use serde::Serialize;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Metadata { 
     pub analyzed_at: DateTime<Utc>, 
     pub sources: String, 
     pub trustpkg_version: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct AnalysisResult {
     pub package: Package,
     pub metadata: Metadata,

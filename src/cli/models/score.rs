@@ -1,4 +1,6 @@
-#[derive(Debug)]
+use serde::Serialize;
+
+#[derive(Debug, Serialize)]
 pub struct TrustScore {
     pub overall: u32,
     pub maintenance: u32,
