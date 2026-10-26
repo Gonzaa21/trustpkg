@@ -5,7 +5,7 @@
 - [x] **Analyzer:** Determines analysis logic
 - [x] **Sources:** Knows where to fetch data
 - [x] **Score:** Scoring system
-- [ ] **Report:** Final results
+- [x] **Report:** Final results
 
 - [x] **Software architecture**
 - [x] **Documentation** (README, vision, roadmap)

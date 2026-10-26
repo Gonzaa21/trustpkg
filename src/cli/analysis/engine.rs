@@ -1,14 +1,7 @@
 use crate::cli::models::analysis::AnalysisResult;
-use crate::cli::models::report::EvidenceKind;
-use crate::cli::models::report::Recommendation;
-use crate::cli::models::report::Severity;
-use crate::cli::sources::crates_io::CratesIo;
-use crate::cli::sources::source::Source;
-use crate::cli::score::popularity::calculate_popularity;
-use crate::cli::score::maintenance::calculate_maintenance;
-use crate::cli::score::security::calculate_security;
-use crate::cli::score::calculator::calculate_score;
-use crate::cli::score::calculator::score_security;
+use crate::cli::models::report::{EvidenceKind, Recommendation, Severity};
+use crate::cli::sources::{crates_io::CratesIo, source::Source};
+use crate::cli::score::{popularity::calculate_popularity, maintenance::calculate_maintenance, security::calculate_security, calculator::{calculate_score, score_security}};
 use crate::cli::models::analysis::Metadata;
 use chrono::Utc;
 
