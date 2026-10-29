@@ -6,56 +6,95 @@ Trustpkg analyzes third-party dependencies by combining security, maintenance, r
 
 ## Features
 
-- Analyze Rust crates
-- Unified trust report
-- Security insights
-- Maintenance metrics
-- Community health
-- Explainable Trust Score
+- Analyze Rust crates from crates.io
+- Unified trust report, in terminal or JSON format
+- Security insights: known advisories from [OSV.dev](https://osv.dev) (includes RustSec)
+- Maintenance metrics: repository activity from GitHub
+- Popularity metrics: download counts
+- Explainable Trust Score with a final verdict
 
-## Usage Example
+## Usage
+
 ```bash
-cargo run -- analyze <crate> --version <version> -- format <format> (json or text)
+trustpkg analyze <crate> [--version <version>] [--format <text|json>]
 ```
-```bash
-cargo run -- analyze emit_ansi_term
 
+| Option | Description | Default |
+|---|---|---|
+| `<crate>` | Name of the crate to analyze | required |
+| `--version` | Specific version to analyze | latest |
+| `--format` | Output format: `text` or `json` | `text` |
+
+While developing, replace `trustpkg` with `cargo run --`.
+
+### Example
+
+```bash
+trustpkg analyze ansi_term
+```
+
+```
 == 1. PACKAGE DETAILS ==
-Name:        emit_ansi_term v0.2.0
-Description: An ANSI (colored) terminal collector for emit.
-Repository:  N/A
-License:     Apache-2.0
-Created:     2016-06-23 09:31:43.452328 UTC
-Updated:     2016-07-05 01:01:25.610080 UTC
+Name:        ansi_term v0.12.1
+Description: Library for ANSI terminal colours and styles (bold, underline)
+Repository:  https://github.com/ogham/rust-ansi-term
+License:     MIT
+Created:     2014-11-26 00:50:42.101172 UTC
+Updated:     2019-09-02 10:16:04.908577 UTC
 Is yanked:   false
-Downloads:   4789 (recent: 8)
+Downloads:   232574994 (recent: 19443837)
 Sources:     crates.io, osv.dev
 
 == 2. SCORE ==
-Maintenance  [######----] Unknown
-Popularity   [####------] 46
-Security     [##########] 100 | 0 advisory (0 critical, 0 high)
+Maintenance  [####------] Inactive
+Popularity   [##########] 100
+Security     [#########-]  95 | 1 advisory (0 critical, 0 high)
 ----------------------------------------
-TRUST SCORE  [#######---] 77 / 100
+TRUST SCORE  [######----] 60 / 100 (capped: inactive repository)
 
 VERDICT      REVIEW
 
 == 3. FINAL REPORT ==
-[INFO] Maintenance could not be verified (no GitHub repository or unreachable)
+[WARN] No repository activity in over a year (Date: 2024-08-01)
+[WARN] 1 known advisories (0 critical, 0 high): RUSTSEC-2021-0139 (Count: 1)
 ```
+
+## How the score works
+
+The Trust Score (0-100) combines three metrics:
+
+| Metric | Weight | How it is computed |
+|---|---|---|
+| Security | 50% | Starts at 100; -40 per critical advisory, -20 per high, -5 per other known advisory |
+| Maintenance | 30% | Based on the last push to the repository (active, inactive or unknown) |
+| Popularity | 20% | Logarithmic scale of total downloads |
+
+Severe findings put a **cap** on the overall score (the lowest applicable cap wins):
+
+| Finding | Maximum score |
+|---|---|
+| Yanked version | 20 |
+| Critical advisory | 30 |
+| Archived repository | 40 |
+| Inactive repository | 60 |
+
+The **verdict** comes from the final score: 80 or more is `TRUSTED`, 50 to 79 is `REVIEW`, and below 50 is `NOT RECOMMENDED`.
+
+If a data source fails (for example, OSV.dev is unreachable), the score is computed with the remaining metrics and marked as `(Partial)`.
+
+## Limitations
+
+- Only crates from crates.io are supported for now.
+- Maintenance data comes from the GitHub API, which allows 60 unauthenticated requests per hour. Crates without a GitHub repository get an `Unknown` maintenance status.
 
 ## Installation
 
-### Prerequisites
-- check if this is needed
-
-### Installation via npm / cargo
+### Install from source
 ```bash
-# to be added later
+git clone https://github.com/Gonzaa21/trustpkg.git
+cd trustpkg
+cargo install --path .
 ```
-
-## Contributing
-Please consult the [contributing guide](CONTRIBUTING.md) to learn how to report bugs, propose new features, or submit pull requests.
 
 ## License
 This project is licensed under the [MIT](LICENSE) license.
