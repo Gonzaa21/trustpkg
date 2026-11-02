@@ -28,8 +28,7 @@ pub fn score_maintenance(metrics: &MaintenanceMetrics) -> u32 {
 
     let mut score = base_score;
 
-    if metrics.status == Status::Active {
-        if let Some(updated_at) = metrics.updated_at {
+    if metrics.status == Status::Active && let Some(updated_at) = metrics.updated_at {
             let now = Utc::now();
             let duration = now.signed_duration_since(updated_at);
             let days = duration.num_days();
@@ -40,7 +39,6 @@ pub fn score_maintenance(metrics: &MaintenanceMetrics) -> u32 {
                 score = score.saturating_sub(15);
             }
         }
-    }
 
     score
 }

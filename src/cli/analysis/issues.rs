@@ -55,8 +55,7 @@ pub fn detect_issues(
         }
     }
 
-    if let Some(s) = sec {
-        if s.known_advisories > 0 {
+    if let Some(s) = sec && s.known_advisories > 0 {
             let severity = if s.critical_advisories > 0 { Severity::Critical } else { Severity::Warning };
             recs.push(Recommendation {
                 severity,
@@ -68,7 +67,6 @@ pub fn detect_issues(
                 evidence: EvidenceKind::Count(s.known_advisories),
             });
         }
-    }
 
     recs
 }
