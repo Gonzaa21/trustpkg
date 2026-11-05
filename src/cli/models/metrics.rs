@@ -5,6 +5,7 @@ pub struct MaintenanceMetrics {
     pub updated_at: Option<DateTime<Utc>>,
     pub repository_archived: Option<bool>,
     pub status: Status,
+    pub reason: Option<MaintenanceReason>,
 }
 #[derive(Debug, Serialize)]
 pub struct PopularityMetrics {
@@ -18,6 +19,16 @@ pub struct SecurityMetrics {
     pub high_advisories: u32,
     pub advisory_ids: Vec<String>,
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+pub enum MaintenanceReason {
+    NoRepository,
+    NotGithub,
+    RepositoryNotFound,
+    RateLimited,
+    RequestFailed,
+}
+
 #[derive(Debug, PartialEq, Serialize)]
 pub enum Status {
     Active,

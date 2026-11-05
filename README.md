@@ -87,6 +87,13 @@ If a data source fails (for example, OSV.dev is unreachable), the score is compu
 - Only crates from crates.io are supported for now.
 - Maintenance data comes from the GitHub API, which allows 60 unauthenticated requests per hour. Crates without a GitHub repository get an `Unknown` maintenance status.
 
+To raise the limit, set a [GitHub token](https://github.com/settings/tokens) (no scopes needed for public repositories):
+
+```bash
+export GITHUB_TOKEN=<your token>        # Linux/macOS
+$env:GITHUB_TOKEN = "<your token>"      # PowerShell
+```
+
 ## Installation
 
 ### Install from source
