@@ -19,6 +19,8 @@ pub enum Commands {
         format: OutputFormat,
         #[arg(long)]
         version: Option<String>,
+        #[arg(long)]
+        refresh: bool
     },
 }
 

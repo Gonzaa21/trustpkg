@@ -24,6 +24,7 @@ trustpkg analyze <crate> [--version <version>] [--format <text|json>]
 | `<crate>` | Name of the crate to analyze | required |
 | `--version` | Specific version to analyze | latest |
 | `--format` | Output format: `text` or `json` | `text` |
+| `--refresh` | fetch fresh data without using cached data | cache data |
 
 While developing, replace `trustpkg` with `cargo run --`.
 
@@ -93,6 +94,18 @@ To raise the limit, set a [GitHub token](https://github.com/settings/tokens) (no
 export GITHUB_TOKEN=<your token>        # Linux/macOS
 $env:GITHUB_TOKEN = "<your token>"      # PowerShell
 ```
+
+## Cache
+
+Responses from crates.io, GitHub and OSV.dev are cached locally, which makes repeated analyses faster and avoids GitHub's rate limit.
+
+| Source | Time to live |
+|---|---|
+| crates.io | 24 hours |
+| GitHub | 24 hours |
+| OSV.dev | 1 hour |
+
+The cache lives in the system cache directory (`%LOCALAPPDATA%\trustpkg` on Windows, `~/.cache/trustpkg` on Linux). Use `--refresh` to ignore it and fetch fresh data.
 
 ## Installation
 

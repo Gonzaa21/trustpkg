@@ -1,5 +1,7 @@
 use serde::Deserialize;
 use chrono::{DateTime, Utc};
+use std::time::Duration;
+use crate::cli::cache::Cache;
 use std::fmt;
 
 pub struct GithubRepoInfo {
@@ -47,48 +49,59 @@ impl Github {
         Self { client, token }
     }
 
-    pub async fn fetch_repo_info(&self, owner: &str, repo: &str) -> Result<GithubRepoInfo, GithubError> {
-        let url: String = format!("https://api.github.com/repos/{owner}/{repo}");
-        
-        let mut request = self.client.get(&url);
-        if let Some(ref token) = self.token {
-            request = request.bearer_auth(token);
-        }
-        
-        let response = request.send().await.map_err(|e| GithubError::Other(e.to_string()))?;
-        let status = response.status();
-        
-        if status == reqwest::StatusCode::NOT_FOUND {
-            return Err(GithubError::NotFound);
-        }
+    pub async fn fetch_repo_info(&self, cache: &Cache, owner: &str, repo: &str) -> Result<GithubRepoInfo, GithubError> {
+        const GITHUB_TTL: Duration = Duration::from_secs(24 * 60 * 60);
 
-        if status == reqwest::StatusCode::TOO_MANY_REQUESTS {
-            return Err(GithubError::RateLimited);
-        }
+        let key = format!("github/{owner}/{repo}");
+        let cached = cache
+            .get(&key, GITHUB_TTL)
+            .and_then(|text| serde_json::from_str::<GithubRepoData>(&text).ok());
 
-        if status == reqwest::StatusCode::FORBIDDEN {
-            let headers = response.headers();
-            let primary_exhausted = headers
-                .get("x-ratelimit-remaining")
-                .and_then(|v| v.to_str().ok())
-                .is_some_and(|s| s.trim() == "0");
-            let secondary_limit = headers.contains_key("retry-after");
-        
-            if primary_exhausted || secondary_limit {
-                return Err(GithubError::RateLimited);
+        let data = match cached {
+            Some(data) => data,
+            None => {
+                let url = format!("https://api.github.com/repos/{owner}/{repo}");
+                let mut request = self
+                    .client
+                    .get(&url)
+                    .header("Accept", "application/vnd.github+json")
+                    .header("X-GitHub-Api-Version", "2022-11-28");
+                if let Some(token) = &self.token {
+                    request = request.bearer_auth(token);
+                }
+
+                let response = request.send().await.map_err(|e| GithubError::Other(e.to_string()))?;
+                let status = response.status();
+
+                if status == reqwest::StatusCode::NOT_FOUND {
+                    return Err(GithubError::NotFound);
+                }
+                if status == reqwest::StatusCode::TOO_MANY_REQUESTS {
+                    return Err(GithubError::RateLimited);
+                }
+                if status == reqwest::StatusCode::FORBIDDEN {
+                    let headers = response.headers();
+                    let primary_exhausted = headers
+                        .get("x-ratelimit-remaining")
+                        .and_then(|v| v.to_str().ok())
+                        .is_some_and(|s| s.trim() == "0");
+                    if primary_exhausted || headers.contains_key("retry-after") {
+                        return Err(GithubError::RateLimited);
+                    }
+                }
+                if !status.is_success() {
+                    return Err(GithubError::Other(format!("GitHub API request failed with status: {status}")));
+                }
+
+                let text = response.text().await.map_err(|e| GithubError::Other(e.to_string()))?;
+                let data: GithubRepoData =
+                    serde_json::from_str(&text).map_err(|e| GithubError::Other(e.to_string()))?;
+                cache.put(&key, &text);
+                data
             }
-        }
+        };
 
-        if !status.is_success() {
-            return Err(GithubError::Other(format!("GitHub API error: status {}", status)));
-        }
-
-        let data: GithubRepoData = response.json().await.map_err(|e| GithubError::Other(e.to_string()))?;
-
-        Ok(GithubRepoInfo { 
-            archived: data.archived, 
-            pushed_at: data.pushed_at 
-        })
+        Ok(GithubRepoInfo { archived: data.archived, pushed_at: data.pushed_at })
     }
 }
 

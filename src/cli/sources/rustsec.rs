@@ -1,4 +1,6 @@
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
+use crate::cli::cache::Cache;
 
 #[derive(Serialize)]
 pub struct OsvQuery { 
@@ -52,21 +54,33 @@ impl Rustsec {
         Self { client }
     }
 
-    pub async fn fetch_advisories(&self, name: String, version: String ) -> Result<RustSecResponse, Box<dyn std::error::Error>> {
-        let ecosystem = "crates.io".to_string();
-        
+    pub async fn fetch_advisories(&self, cache: &Cache, name: String, version: String) -> Result<RustSecResponse, Box<dyn std::error::Error>> {
+        const RUSTSEC_TTL: Duration = Duration::from_secs(60 * 60);
+    
+        let key = format!("osv/{name}/{version}");
+        let cached = cache
+            .get(&key, RUSTSEC_TTL)
+            .and_then(|text| serde_json::from_str::<RustSecResponse>(&text).ok());
+    
+        if let Some(data) = cached {
+            return Ok(data);
+        }
+    
         let body = OsvQuery {
-            package: OsvPackageResponseData { name, ecosystem },
+            package: OsvPackageResponseData { name, ecosystem: "crates.io".to_string() },
             version,
             commit: None,
             page_token: None,
         };
-        
-        let url = "https://api.osv.dev/v1/query".to_string();
-        let response = self.client.post(url).json(&body).send().await?;
-
-        let data: RustSecResponse = response.json().await?;
-
+    
+        let response = self.client.post("https://api.osv.dev/v1/query").json(&body).send().await?;
+        if !response.status().is_success() {
+            return Err(format!("OSV API request failed with status: {}", response.status()).into());
+        }
+    
+        let text = response.text().await?;
+        let data: RustSecResponse = serde_json::from_str(&text)?;
+        cache.put(&key, &text);
         Ok(data)
     }
 }

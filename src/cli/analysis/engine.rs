@@ -4,23 +4,27 @@ use crate::cli::sources::{crates_io::CratesIo, source::Source};
 use crate::cli::score::{popularity::calculate_popularity, maintenance::calculate_maintenance, security::calculate_security, calculator::calculate_score};
 use crate::cli::models::analysis::Metadata;
 use crate::cli::analysis::issues::detect_issues;
+use crate::cli::cache::Cache;
 use chrono::Utc;
 
 pub async fn run_analysis(
     name: String,
     version: Option<String>,
+    refresh: bool,
 ) -> Result<AnalysisResult, Box<dyn std::error::Error>> {
+    let cache = Cache::new(refresh);
+
     let source = CratesIo::new();
     let mut sources = String::from(source.name());
     
-    let package = source.fetch(&name, version.as_deref()).await?;
+    let package = source.fetch(&cache, &name, version.as_deref()).await?;
 
     let pop = calculate_popularity(&package);
-    let maint = calculate_maintenance(&package).await;
+    let maint = calculate_maintenance(&cache, &package).await;
 
     let mut recommendations = Vec::new();
 
-    let sec = match calculate_security(&package).await {
+    let sec = match calculate_security(&cache, &package).await {
         Ok(m) => {
             sources.push_str(", osv.dev");
             Some(m)

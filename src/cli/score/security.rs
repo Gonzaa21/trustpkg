@@ -1,11 +1,12 @@
 use crate::cli::models::metrics::{SecurityMetrics, VulnSeverity};
 use crate::cli::models::package::Package;
 use crate::cli::sources::rustsec::{Rustsec, VulnsData};
+use crate::cli::cache::Cache;
 
-pub async fn calculate_security(package: &Package) -> Result<SecurityMetrics, Box<dyn std::error::Error>> {
+pub async fn calculate_security(cache: &Cache, package: &Package) -> Result<SecurityMetrics, Box<dyn std::error::Error>> {
 
     let resp = Rustsec::new()
-        .fetch_advisories(package.name.clone(), package.version.clone())
+        .fetch_advisories(cache, package.name.clone(), package.version.clone())
         .await?;
 
     fn highest_severity(vuln: &VulnsData) -> VulnSeverity {

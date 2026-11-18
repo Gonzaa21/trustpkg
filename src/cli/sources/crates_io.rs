@@ -3,6 +3,8 @@ use chrono::{DateTime, Utc};
 use async_trait::async_trait;
 use crate::cli::sources::source::Source;
 use crate::cli::models::package::Package;
+use crate::cli::cache::Cache;
+use std::time::Duration;
 
 #[derive(Deserialize)]
 pub struct CratesIoResponse {
@@ -50,15 +52,29 @@ impl Source for CratesIo {
         "crates.io"
     }
     
-    async fn fetch(&self, name: &str, version: Option<&str>) -> Result<Package, Box<dyn std::error::Error>> {
-        let url: String = format!("https://crates.io/api/v1/crates/{name}");
-        let response = self.client.get(&url).send().await?;
-        
-        if response.status() == reqwest::StatusCode::NOT_FOUND {
-            return Err(format!("Crate '{name}' not found on crates.io").into());
-        }
+    async fn fetch(&self, cache: &Cache, name: &str, version: Option<&str>) -> Result<Package, Box<dyn std::error::Error>> {
+        const CRATES_TTL: Duration = Duration::from_secs(24 * 60 * 60);
 
-        let data: CratesIoResponse = response.json().await?;
+        let key = format!("crates.io/{name}");
+        let cached = cache
+            .get(&key, CRATES_TTL)
+            .and_then(|text| serde_json::from_str::<CratesIoResponse>(&text).ok());
+
+        let data = match cached {
+            Some(data) => data,
+            None => {
+                let url = format!("https://crates.io/api/v1/crates/{name}");
+                let response = self.client.get(&url).send().await?;
+                if response.status() == reqwest::StatusCode::NOT_FOUND {
+                    return Err(format!("Crate '{name}' not found on crates.io").into());
+                }
+                let text = response.text().await?;
+                let data: CratesIoResponse = serde_json::from_str(&text)?;
+                cache.put(&key, &text);
+                data
+            }
+        };
+
         let requested_version = version.unwrap_or(&data.crate_data.max_version);
 
         let version_data = data.versions.iter()

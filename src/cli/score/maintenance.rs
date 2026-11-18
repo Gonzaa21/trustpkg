@@ -3,6 +3,7 @@ use crate::cli::models::metrics::{MaintenanceMetrics, Status, MaintenanceReason}
 use crate::cli::models::package::Package;
 use crate::cli::sources::github::{GithubError, parse_github_url};
 use crate::cli::sources::github::Github;
+use crate::cli::cache::Cache;
 
 fn unknown(reason: MaintenanceReason) -> MaintenanceMetrics {
     MaintenanceMetrics {
@@ -13,7 +14,7 @@ fn unknown(reason: MaintenanceReason) -> MaintenanceMetrics {
     }
 }
 
-pub async fn calculate_maintenance(package: &Package) -> MaintenanceMetrics {
+pub async fn calculate_maintenance(cache: &Cache, package: &Package) -> MaintenanceMetrics {
     let repository = match package.repository.as_deref() {
         Some(repo) => repo,
         None => return unknown(MaintenanceReason::NoRepository),
@@ -24,7 +25,7 @@ pub async fn calculate_maintenance(package: &Package) -> MaintenanceMetrics {
         None => return unknown(MaintenanceReason::NotGithub),
     };
 
-    let info = match Github::new().fetch_repo_info(&owner, &repo).await {
+    let info = match Github::new().fetch_repo_info(cache, &owner, &repo).await {
         Ok(info) => info,
         Err(GithubError::NotFound) => return unknown(MaintenanceReason::RepositoryNotFound),
         Err(GithubError::RateLimited) => return unknown(MaintenanceReason::RateLimited),

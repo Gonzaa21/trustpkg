@@ -9,8 +9,8 @@ pub async fn run() {
     let cli = Cli::parse();
 
     let result = match cli.commands {
-        Commands::Analyze { name, version, format } => {
-            match run_analysis(name, version).await {
+        Commands::Analyze { name, version, format, refresh } => {
+            match run_analysis(name, version, refresh).await {
                 Ok(analysis_result) => handle_output(&analysis_result, format),
                 Err(e) => Err(e),
             }
